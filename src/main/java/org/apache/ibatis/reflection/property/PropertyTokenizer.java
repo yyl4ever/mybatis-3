@@ -19,6 +19,8 @@ import java.util.Iterator;
 
 /**
  * @author Clinton Begin
+ * PropertyTokenizer 工具类负责解析由“.”和“[]”构成的表达式。
+ * PropertyTokenizer 继承了 Iterator 接口，可以迭代处理嵌套多层表达式。
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
   private String name;

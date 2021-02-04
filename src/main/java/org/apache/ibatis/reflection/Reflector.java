@@ -49,25 +49,50 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  */
 public class Reflector {
 
+  /**
+   * 该 Reflector 对象封装的 Class 类型
+   */
   private final Class<?> type;
+  // 可读属性的名称集合
   private final String[] readablePropertyNames;
+  // 可写属性的名称集合
   private final String[] writablePropertyNames;
+
+  /**
+   * 可读、可写属性对应的 getter 方法和 setter 方法集合，key 是属性的名称，
+   * value 是一个 Invoker 对象。Invoker 是对 Method 对象的封装。
+   */
   private final Map<String, Invoker> setMethods = new HashMap<>();
   private final Map<String, Invoker> getMethods = new HashMap<>();
+
+  /**
+   * 属性对应的 getter 方法返回值以及 setter 方法的参数值类型，key 是属性名称，value 是方法的返回值类型或参数类型
+   */
   private final Map<String, Class<?>> setTypes = new HashMap<>();
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+
+  // 默认构造方法
   private Constructor<?> defaultConstructor;
 
+  // 所有属性名称的集合，记录到这个集合中的属性名称都是大写的
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
+    // 用 type 字段记录传入的 Class 对象
     type = clazz;
+    // 通过反射拿到 Class 类的全部构造方法，并进行遍历，过滤得到唯一的无参构造方法来初始化 defaultConstructor 字段
     addDefaultConstructor(clazz);
+    // 读取 Class 类中的 getter方法，填充上面介绍的 getMethods 集合和 getTypes 集合
     addGetMethods(clazz);
+    // 读取 Class 类中的 setter 方法，填充上面介绍的 setMethods 集合和 setTypes 集合
     addSetMethods(clazz);
+    // 调用 addFields() 方法处理没有 getter/setter 方法的字段
+    // 读取 Class 中没有 getter/setter 方法的字段，生成对应的 Invoker 对象，填充 getMethods 集合、getTypes 集合以及 setMethods 集合、setTypes 集合
     addFields(clazz);
+    // 根据前面三步构造的 getMethods/setMethods 集合的 keySet，初始化 readablePropertyNames、writablePropertyNames 集合
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
+    // 遍历构造的 readablePropertyNames、writablePropertyNames 集合，将其中的属性名称全部转化成大写并记录到 caseInsensitivePropertyMap 集合中
     for (String propName : readablePropertyNames) {
       caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
     }
@@ -83,10 +108,24 @@ public class Reflector {
   }
 
   private void addGetMethods(Class<?> clazz) {
+    // HashMap<String, List>()类型，Key 为属性名称，Value 是该属性对应的 getter 方法集合
     Map<String, List<Method>> conflictingGetters = new HashMap<>();
+    // 获取方法信息
+    // 调用 getClassMethods() 方法获取当前 Class 类的所有方法的唯一签名（注意一下，这里同时包含继承自父类以及接口的方法），以及每个方法对应的 Method 对象
     Method[] methods = getClassMethods(clazz);
+    // 按照 Java 的规范，从上一步返回的 Method 数组中查找 getter 方法，将其记录到 conflictingGetters 集合中。
+    // 为什么一个属性会查找到多个 getter 方法呢？这主要是由于类间继承导致的，在子类中我们可以覆盖父类的方法，覆盖不仅可以修改方法的具体实现，还可以修改方法的返回值，getter 方法也不例外，这就导致在第一步中产生了两个签名不同的方法。
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+    // 解决方法签名冲突。调用 resolveGetterConflicts() 方法对这种 getter 方法的冲突进行处理，
+    // 处理冲突的核心逻辑其实就是比较 getter 方法的返回值，优先选择返回值为子类的 getter 方法，例如：
+    /*
+     * 该方法定义在SuperClazz类中
+     * public List getA();
+     * 该方法定义在SubClazz类中，SubClazz继承了SuperClazz类
+     * public ArrayList getA();
+     * 可以看到，SubClazz.getA() 方法的返回值 ArrayList 是其父类 SuperClazz 中 getA() 方法返回值 List 的子类，所以这里选择 SubClazz 中定义的 getA() 方法作为 A 这个属性的 getter 方法。
+     */
     resolveGetterConflicts(conflictingGetters);
   }
 
@@ -118,6 +157,7 @@ public class Reflector {
           break;
         }
       }
+      // 处理完上述 getter 方法冲突之后，会为每个 getter 方法创建对应的 MethodInvoker 对象，然后统一保存到 getMethods 集合中。
       addGetMethod(propName, winner, isAmbiguous);
     }
   }
@@ -130,6 +170,7 @@ public class Reflector {
         : new MethodInvoker(method);
     getMethods.put(name, invoker);
     Type returnType = TypeParameterResolver.resolveReturnType(method, type);
+    // 在 getTypes 集合中维护属性名称与对应 getter 方法返回值类型的映射。
     getTypes.put(name, typeToClass(returnType));
   }
 
@@ -234,7 +275,9 @@ public class Reflector {
           addSetField(field);
         }
       }
+      // 处理没有 getter 方法的字段
       if (!getMethods.containsKey(field.getName())) {
+        // 为这些字段生成对应的 GetFieldInvoker 对象并记录到 getMethods 集合中，同时也会将属性名称和属性类型记录到 getTypes 集合中
         addGetField(field);
       }
     }
@@ -273,9 +316,14 @@ public class Reflector {
    * @return An array containing all methods in this class
    */
   private Method[] getClassMethods(Class<?> clazz) {
+    // 使用 Map<String, Method> 集合记录遍历到的方法，实现去重的效果，其中 Key 是对应的方法签名，Value 为方法对应的 Method 对象
+    // 生成的方法签名的格式如下：返回值类型#方法名称:参数类型列表，例如，addGetMethods(Class) 方法的唯一签名是：
+    // java.lang.String#addGetMethods:java.lang.Class
+    // 可见，这里生成的方法签名是包含返回值的，可以作为该方法全局唯一的标识
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
     while (currentClass != null && currentClass != Object.class) {
+      // 递归扫描父类以及父接口
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -

@@ -21,6 +21,13 @@ import java.util.Properties;
 /**
  * MyBatis uses an ObjectFactory to create all needed new Objects.
  *
+ * ObjectFactory 是 MyBatis 中的反射工厂，其中提供了两个 create() 方法的重载，
+ * 我们可以通过两个 create() 方法创建指定类型的对象。
+ *
+ * 除了使用 DefaultObjectFactory 这个默认实现之外，我们还可以在 mybatis-config.xml 配置文件中
+ * 配置自定义 ObjectFactory 接口扩展实现 类（在 MyBatis 提供的测试类中，就包含了自定义的 ObjectFactory 实现，
+ * 可以参考我们的源码 https://github.com/xxxlxy2008/mybatis），完成自定义的功能扩展。
+ *
  * @author Clinton Begin
  */
 public interface ObjectFactory {

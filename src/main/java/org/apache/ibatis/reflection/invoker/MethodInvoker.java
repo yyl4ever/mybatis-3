@@ -38,6 +38,15 @@ public class MethodInvoker implements Invoker {
     }
   }
 
+  /**
+   * 通过反射方式执行底层封装的 Method 方法（例如，getter/setter 方法）完成属性读写效果的
+   *
+   * @param target
+   * @param args
+   * @return
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException {
     try {

@@ -49,7 +49,10 @@ public class MapperProxyFactory<T> {
   }
 
   public T newInstance(SqlSession sqlSession) {
+    // mapperInterface -- 为哪些接口做代理（拦截什么方法）
+    // mapperProxy -- 在哪个类中监听增强操作的方法（把这些方法拦截到哪里处理） -- yyl 有点像 invocationHandler
     final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSession, mapperInterface, methodCache);
+    // 返回一个代理对象
     return newInstance(mapperProxy);
   }
 

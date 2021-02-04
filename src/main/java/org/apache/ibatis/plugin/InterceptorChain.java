@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class InterceptorChain {
 
+  // 拦截器模式
   private final List<Interceptor> interceptors = new ArrayList<>();
 
   public Object pluginAll(Object target) {
@@ -34,10 +35,12 @@ public class InterceptorChain {
   }
 
   public void addInterceptor(Interceptor interceptor) {
+    // 看源码技巧：打断点看调用堆栈
     interceptors.add(interceptor);
   }
 
   public List<Interceptor> getInterceptors() {
+    // 不允许外界更改，只能调用 addInterceptor 方法
     return Collections.unmodifiableList(interceptors);
   }
 

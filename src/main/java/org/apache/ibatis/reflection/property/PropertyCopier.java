@@ -21,6 +21,9 @@ import org.apache.ibatis.reflection.Reflector;
 
 /**
  * @author Clinton Begin
+ * PropertyCopier 是一个属性拷贝的工具类，提供了与 Spring
+ * 中 BeanUtils.copyProperties() 类似的功能，
+ * 实现相同类型的两个对象之间的属性值拷贝，其核心方法是 copyBeanProperties() 方法。
  */
 public final class PropertyCopier {
 

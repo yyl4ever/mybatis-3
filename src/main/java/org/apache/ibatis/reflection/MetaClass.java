@@ -28,6 +28,9 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ * MetaClass 提供了获取类中属性描述信息的功能，底层依赖前面介绍的 Reflector
+ *
+ * MetaClass 中的其他方法实现也都大多是依赖 PropertyTokenizer 解析表达式，然后递归查找，查找过程会依赖 Reflector 的相关方法。
  */
 public class MetaClass {
 
@@ -36,6 +39,8 @@ public class MetaClass {
 
   private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
     this.reflectorFactory = reflectorFactory;
+    // 将传入的 Class 封装成一个 Reflector 对象，并记录到 reflector 字段中
+    // ，MetaClass 的后续属性查找都会使用到该 Reflector 对象
     this.reflector = reflectorFactory.findForClass(type);
   }
 
@@ -48,6 +53,20 @@ public class MetaClass {
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  /**
+   * 实现属性查找的核心方法，它主要处理了“.”导航的属性查找，该方法会用
+   * PropertyTokenizer 解析传入的 name 表达式，该表达式可能通过“.”导航多层，
+   * 例如，order.deliveryAddress.customer.name。
+   * MetaClass 会逐层处理这个表达式，首先通过 Order 类型对应的 Reflector 查找 deliveryAddress 属性，查找成功之后，
+   * 根据 deliveryAddress 属性的类型（即 Address 类型）创建对应的 MetaClass 对象（以及底层的 Reflector 对象），
+   * 再继续查找其中的 customer 属性，如此递归处理，直至最后查找到 Customer 中的 name 属性。这部分递归查找逻辑位于 MetaClass.buildProperty() 方法中。
+   *
+   * 在上述 MetaClass 查找属性的过程中，还会调用 hasGetter() 和 hasSetter() 方法负责判断属性表达式中指定的属性是否有对应的 getter/setter 方法。
+   * 这两个方法也是先通过 PropertyTokenizer 解析传入的 name 表达式，然后进行递归查询，
+   * 在递归查询中会依赖 Reflector.hasGetter() 方法查找前文介绍的 getMethods 集合或 setMethods 集合，查找属性对应的 getter/setter 方法。
+   * @param name
+   * @return
+   */
   public String findProperty(String name) {
     StringBuilder prop = buildProperty(name, new StringBuilder());
     return prop.length() > 0 ? prop.toString() : null;
@@ -175,6 +194,7 @@ public class MetaClass {
       if (propertyName != null) {
         builder.append(propertyName);
         builder.append(".");
+        // yyl 不断地创建对应的 MetaClass 对象
         MetaClass metaProp = metaClassForProperty(propertyName);
         metaProp.buildProperty(prop.getChildren(), builder);
       }

@@ -22,6 +22,8 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Plugin;
 
+// 教你怎么写 mybatis 的拦截器
+// https://mp.weixin.qq.com/s/yBrCiaZV5CbEurppYXpDvA
 @Intercepts({})
 public class ExamplePlugin implements Interceptor {
   private Properties properties;

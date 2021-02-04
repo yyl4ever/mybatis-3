@@ -11,6 +11,10 @@ import java.util.Map;
  */
 public interface TtlProductInfoMapper {
 
-    List<TtlProductInfoPo> listProduct(Map<String, Object> map);
+  List<TtlProductInfoPo> listProduct(Map<String, Object> map);
+
+  TtlProductInfoPo get(Long id);
+
+  int add(TtlProductInfoPo ttlProductInfoPo);
 
 }

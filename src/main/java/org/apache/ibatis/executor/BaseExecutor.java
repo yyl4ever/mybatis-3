@@ -267,6 +267,7 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  // 模板模式
   protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
 
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;

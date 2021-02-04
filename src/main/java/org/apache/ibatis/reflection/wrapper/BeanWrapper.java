@@ -28,6 +28,8 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ * BeanWrapper 继承了 BaseWrapper 抽象类，底层除了封装了一个 JavaBean 对象之外，
+ * 还封装了该 JavaBean 类型对应的 MetaClass 对象，以及从 BaseWrapper 继承下来的 MetaObject 对象。
  */
 public class BeanWrapper extends BaseWrapper {
 
@@ -40,6 +42,13 @@ public class BeanWrapper extends BaseWrapper {
     this.metaClass = MetaClass.forClass(object.getClass(), metaObject.getReflectorFactory());
   }
 
+  /**
+   * 在 get() 方法和 set() 方法实现中，BeanWrapper 会根据传入的属性表达式，获取/设置相应的属性值。以 get() 方法为例，
+   * 首先会判断表达式中是否含有数组下标，如果含有下标，会通过 resolveCollection() 和 getCollectionValue() 方法从集合中获取相应元素；
+   * 如果不包含下标，则通过 MetaClass 查找属性名称在 Reflector.getMethods 集合中相应的 GetFieldInvoker，然后调用 Invoker.invoke() 方法读取属性值。
+   * @param prop
+   * @return
+   */
   @Override
   public Object get(PropertyTokenizer prop) {
     if (prop.getIndex() != null) {
@@ -50,6 +59,13 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  /**
+   * 依赖 MetaClass、MetaObject 完成相关对象中属性信息读写
+   * 参考源码进行学习 https://github.com/xxxlxy2008/mybatis
+   *
+   * @param prop
+   * @param value
+   */
   @Override
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.getIndex() != null) {

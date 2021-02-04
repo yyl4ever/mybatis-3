@@ -76,12 +76,15 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     lookupConstructor = lookup;
   }
 
+  // 被拦截的方法在这里处理
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
+      // 如果是 Object 的方法，就走这个分支
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, args);
       } else {
+        // 我们的方法就会走到这个分支
         return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
       }
     } catch (Throwable t) {
@@ -92,6 +95,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
   private MapperMethodInvoker cachedInvoker(Method method) throws Throwable {
     try {
       return methodCache.computeIfAbsent(method, m -> {
+        // 如果是接口里面的 default 方法，就走这个分支
         if (m.isDefault()) {
           try {
             if (privateLookupInMethod == null) {
@@ -104,6 +108,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
             throw new RuntimeException(e);
           }
         } else {
+          // 我们的方法会走到这个分支
+          // new MapperMethod：将接口，方法和 sqlSession 设置进 MapperMethod 的属性中
+          // 返回了一个静态内部类的实例
           return new PlainMethodInvoker(new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
         }
       });
@@ -141,6 +148,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args, SqlSession sqlSession) throws Throwable {
+      // 将参数传入 mapperMethod 对象中执行
       return mapperMethod.execute(sqlSession, args);
     }
   }

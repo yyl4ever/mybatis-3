@@ -56,9 +56,11 @@ public class MapperMethod {
 
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
+    // 根据类型判断具体要做的是 CRUD 的哪个操作
     switch (command.getType()) {
       case INSERT: {
         Object param = method.convertArgsToSqlCommandParam(args);
+        // commandName 为接口全限定名.方法名
         result = rowCountResult(sqlSession.insert(command.getName(), param));
         break;
       }
@@ -84,6 +86,7 @@ public class MapperMethod {
           result = executeForCursor(sqlSession, args);
         } else {
           Object param = method.convertArgsToSqlCommandParam(args);
+          // 根据 commandName 找到对应的标签，接着找到 sql，传入 param，得到执行结果
           result = sqlSession.selectOne(command.getName(), param);
           if (method.returnsOptional()
               && (result == null || !method.getReturnType().equals(result.getClass()))) {
@@ -101,6 +104,7 @@ public class MapperMethod {
       throw new BindingException("Mapper method '" + command.getName()
           + " attempted to return null from a method with a primitive return type (" + method.getReturnType() + ").");
     }
+    // 将执行结果返回
     return result;
   }
 

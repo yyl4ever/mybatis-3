@@ -19,7 +19,7 @@
   </environments>
 
   <mappers>
-    <mapper  resource="mybatis/mapper/TtlProductInfoMapper.xml"/>
+    <mapper resource="mybatis/mapper/TtlProductInfoMapper.xml"/>
   </mappers>
 
 

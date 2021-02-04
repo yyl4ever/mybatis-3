@@ -45,6 +45,7 @@ public class Plugin implements InvocationHandler {
     Class<?> type = target.getClass();
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
     if (interfaces.length > 0) {
+      // 生成Plugin代理对象
       return Proxy.newProxyInstance(
           type.getClassLoader(),
           interfaces,
@@ -57,6 +58,8 @@ public class Plugin implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     try {
       Set<Method> methods = signatureMap.get(method.getDeclaringClass());
+      // 考点：mybatis 怎么知道要拦截哪些方法的？
+      // https://mp.weixin.qq.com/s/yBrCiaZV5CbEurppYXpDvA
       if (methods != null && methods.contains(method)) {
         return interceptor.intercept(new Invocation(target, method, args));
       }
