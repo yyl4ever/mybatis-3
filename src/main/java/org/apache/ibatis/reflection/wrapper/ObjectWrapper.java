@@ -25,7 +25,7 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  * @author Clinton Begin
  * MetaClass 中封装的是 Class 元信息，ObjectWrapper 封装的则是对象元信息。
  * 在 ObjectWrapper 中抽象了一个对象的属性信息，并提供了查询对象属性信息的相关方法，以及更新属性值的相关方法。
- * ObjectWrapper 实现了读写对象属性值、检测getter/setter 等基础功能
+ * ObjectWrapper 实现了读写对象属性值、检测 getter/setter 等基础功能
  */
 public interface ObjectWrapper {
 

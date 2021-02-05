@@ -74,13 +74,13 @@ public class TypeParameterResolver {
    *         they will be resolved to the actual runtime {@link Type}s.
    */
   public static Type[] resolveParamTypes(Method method, Type srcType) {
-    Type[] paramTypes = method.getGenericParameterTypes();
-    Class<?> declaringClass = method.getDeclaringClass();
+    Type[] paramTypes = method.getGenericParameterTypes();// 方法的参数类型
+    Class<?> declaringClass = method.getDeclaringClass();// 方法所在的类
     Type[] result = new Type[paramTypes.length];
     for (int i = 0; i < paramTypes.length; i++) {
       result[i] = resolveType(paramTypes[i], srcType, declaringClass);
     }
-    return result;
+    return result;// 解析方法的类型
   }
 
   private static Type resolveType(Type type, Type srcType, Class<?> declaringClass) {

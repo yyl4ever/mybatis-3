@@ -32,9 +32,9 @@ public class MethodInvoker implements Invoker {
     this.method = method;
 
     if (method.getParameterTypes().length == 1) {
-      type = method.getParameterTypes()[0];
+      type = method.getParameterTypes()[0];// setter 方法的参数
     } else {
-      type = method.getReturnType();
+      type = method.getReturnType(); // getter 方法的返回类型
     }
   }
 

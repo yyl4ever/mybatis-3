@@ -69,12 +69,12 @@ public class Reflector {
    * 属性对应的 getter 方法返回值以及 setter 方法的参数值类型，key 是属性名称，value 是方法的返回值类型或参数类型
    */
   private final Map<String, Class<?>> setTypes = new HashMap<>();
-  private final Map<String, Class<?>> getTypes = new HashMap<>();
+  private final Map<String, Class<?>> getTypes = new HashMap<>();// 属性名称:对应的返回值类型
 
   // 默认构造方法
   private Constructor<?> defaultConstructor;
 
-  // 所有属性名称的集合，记录到这个集合中的属性名称都是大写的
+  // 所有属性名称的集合，记录到这个集合中的属性名称都是大写的,类似 BRANCHID -> branchId
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
@@ -114,7 +114,8 @@ public class Reflector {
     // 调用 getClassMethods() 方法获取当前 Class 类的所有方法的唯一签名（注意一下，这里同时包含继承自父类以及接口的方法），以及每个方法对应的 Method 对象
     Method[] methods = getClassMethods(clazz);
     // 按照 Java 的规范，从上一步返回的 Method 数组中查找 getter 方法，将其记录到 conflictingGetters 集合中。
-    // 为什么一个属性会查找到多个 getter 方法呢？这主要是由于类间继承导致的，在子类中我们可以覆盖父类的方法，覆盖不仅可以修改方法的具体实现，还可以修改方法的返回值，getter 方法也不例外，这就导致在第一步中产生了两个签名不同的方法。
+    // 为什么一个属性会查找到多个 getter 方法呢？这主要是由于类间继承导致的，在子类中我们可以覆盖父类的方法，覆盖不仅可以修改方法的具体实现，
+    // 还可以修改方法的返回值，getter 方法也不例外，这就导致在第一步中产生了两个签名不同的方法。
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
     // 解决方法签名冲突。调用 resolveGetterConflicts() 方法对这种 getter 方法的冲突进行处理，
@@ -175,7 +176,7 @@ public class Reflector {
   }
 
   private void addSetMethods(Class<?> clazz) {
-    Map<String, List<Method>> conflictingSetters = new HashMap<>();
+    Map<String, List<Method>> conflictingSetters = new HashMap<>();// 存放所有的属性名和对应的 setter 方法
     Method[] methods = getClassMethods(clazz);
     Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
       .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
@@ -193,7 +194,7 @@ public class Reflector {
     for (Entry<String, List<Method>> entry : conflictingSetters.entrySet()) {
       String propName = entry.getKey();
       List<Method> setters = entry.getValue();
-      Class<?> getterType = getTypes.get(propName);
+      Class<?> getterType = getTypes.get(propName);// todo getTypes 已经有值了，什么时候塞的？
       boolean isGetterAmbiguous = getMethods.get(propName) instanceof AmbiguousMethodInvoker;
       boolean isSetterAmbiguous = false;
       Method match = null;
@@ -245,7 +246,7 @@ public class Reflector {
   private Class<?> typeToClass(Type src) {
     Class<?> result = null;
     if (src instanceof Class) {
-      result = (Class<?>) src;
+      result = (Class<?>) src;// Type 转为 Class
     } else if (src instanceof ParameterizedType) {
       result = (Class<?>) ((ParameterizedType) src).getRawType();
     } else if (src instanceof GenericArrayType) {
@@ -322,8 +323,8 @@ public class Reflector {
     // 可见，这里生成的方法签名是包含返回值的，可以作为该方法全局唯一的标识
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
-    while (currentClass != null && currentClass != Object.class) {
-      // 递归扫描父类以及父接口
+    while (currentClass != null && currentClass != Object.class) {// yyl 单层级的可以这样遍历
+      // 递归扫描父类以及父接口 -- getDeclaredMethods只有本类的方法，不含父类
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -
@@ -343,7 +344,7 @@ public class Reflector {
 
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
-      if (!currentMethod.isBridge()) {
+      if (!currentMethod.isBridge()) {// 不是桥接方法（编译器生成的）
         String signature = getSignature(currentMethod);
         // check to see if the method is already known
         // if it is known, then an extended class must have

@@ -33,8 +33,8 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public class BeanWrapper extends BaseWrapper {
 
-  private final Object object;
-  private final MetaClass metaClass;
+  private final Object object;// JavaBean 对象
+  private final MetaClass metaClass;// 该 JavaBean 类型对应的 MetaClass 对象
 
   public BeanWrapper(MetaObject metaObject, Object object) {
     super(metaObject);
@@ -72,7 +72,7 @@ public class BeanWrapper extends BaseWrapper {
       Object collection = resolveCollection(prop, object);
       setCollectionValue(prop, collection, value);
     } else {
-      setBeanProperty(prop, object, value);
+      setBeanProperty(prop, object, value);// 为 object 设置属性值
     }
   }
 
@@ -190,10 +190,10 @@ public class BeanWrapper extends BaseWrapper {
 
   private void setBeanProperty(PropertyTokenizer prop, Object object, Object value) {
     try {
-      Invoker method = metaClass.getSetInvoker(prop.getName());
+      Invoker method = metaClass.getSetInvoker(prop.getName());// 获得这个属性的 setter 方法(封装成了 Invoker 对象)
       Object[] params = {value};
       try {
-        method.invoke(object, params);
+        method.invoke(object, params);// 反射，调用底层的 invoke 方法，为对象的属性进行赋值
       } catch (Throwable t) {
         throw ExceptionUtil.unwrapThrowable(t);
       }

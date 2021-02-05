@@ -67,7 +67,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     try {
       Constructor<T> constructor;
       if (constructorArgTypes == null || constructorArgs == null) {
-        constructor = type.getDeclaredConstructor();
+        constructor = type.getDeclaredConstructor();// 获取默认的构造函数
         try {
           return constructor.newInstance();
         } catch (IllegalAccessException e) {
