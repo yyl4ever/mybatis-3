@@ -35,6 +35,8 @@ import org.apache.ibatis.transaction.TransactionException;
  * @author Clinton Begin
  *
  * @see JdbcTransactionFactory
+ *
+ * 维护了事务关联的数据库连接以及数据源对象，同时还记录了事务自身的属性，例如，事务隔离级别和是否自动提交。
  */
 public class JdbcTransaction implements Transaction {
 
@@ -45,6 +47,15 @@ public class JdbcTransaction implements Transaction {
   protected TransactionIsolationLevel level;
   protected boolean autoCommit;
 
+  /**
+   * 在构造函数中，JdbcTransaction 并没有立即初始化数据库连接（也就是 connection 字段），
+   * connection 字段会被延迟初始化，具体的初始化时机是在调用 getConnection() 方法时，
+   * 通过 dataSource.getConnection() 方法完成初始化。
+   *
+   * @param ds
+   * @param desiredLevel
+   * @param desiredAutoCommit
+   */
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
     dataSource = ds;
     level = desiredLevel;

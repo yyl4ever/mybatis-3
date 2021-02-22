@@ -23,11 +23,22 @@ import org.apache.ibatis.cache.CacheException;
 
 /**
  * @author Clinton Begin
+ * Cache 接口的实现类，扮演了装饰器模式中 ComponentImpl 这个角色，
+ * 实现了 Cache 接口缓存数据的基本能力。
+ * 除了 PerpetualCache 之外的其他所有 Cache 接口实现类，都是装饰器实现，
+ * 也就是 DecoratorImpl 的角色。
  */
 public class PerpetualCache implements Cache {
 
+  /**
+   * 记录了缓存对象的唯一标识
+   */
   private final String id;
 
+  /**
+   * 真正实现 Cache 存储的数据结构，对 Cache 接口的实现也会直接委托给这个 HashMap 对象的相关方法，
+   * 例如，PerpetualCache 中 putObject() 方法就是调用 cache 的 put() 方法写入缓存数据的。
+   */
   private final Map<Object, Object> cache = new HashMap<>();
 
   public PerpetualCache(String id) {

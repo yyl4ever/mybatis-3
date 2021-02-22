@@ -34,11 +34,19 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ * 维护别名配置的核心实现，提供了别名注册、别名查询的基本功能
  */
 public class TypeAliasRegistry {
-
+  /**
+   * 记录了别名与 Java 类型之间的对应关系
+   */
   private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
+  /**
+   * 通过上述 registerAlias() 方法将 Java 的基本类型、基本类型的数组类型、基本类型的封装类、
+   * 封装类型的数组类型、Date、BigDecimal、BigInteger、Map、HashMap、List、ArrayList、
+   * Collection、Iterator、ResultSet 等常用类型添加了别名
+   */
   public TypeAliasRegistry() {
     registerAlias("string", String.class);
 
@@ -125,37 +133,53 @@ public class TypeAliasRegistry {
     registerAliases(packageName, Object.class);
   }
 
+  /**
+   * 扫描指定包名下所有的类中的 @Alias 注解获取别名配置，并完成注册的功能
+   * @param packageName
+   * @param superType
+   */
   public void registerAliases(String packageName, Class<?> superType) {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+    // 查找指定包下所有的superType类型
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
     for (Class<?> type : typeSet) {
+      // 过滤掉内部类、接口以及抽象类
       // Ignore inner classes and interfaces (including package-info.java)
       // Skip also inner classes. See issue #6
       if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
-        registerAlias(type);
+        registerAlias(type);// 扫描类中的@Alias注解
       }
     }
   }
 
+  /**
+   * 通过 registerAlias() 方法完成别名的注册
+   * @param type
+   */
   public void registerAlias(Class<?> type) {
-    String alias = type.getSimpleName();
-    Alias aliasAnnotation = type.getAnnotation(Alias.class);
+    String alias = type.getSimpleName();// 获取类的简单名称，其中不会包含包名
+    Alias aliasAnnotation = type.getAnnotation(Alias.class);// 获取类中的@Alias注解
     if (aliasAnnotation != null) {
+      // 获取特定别名
       alias = aliasAnnotation.value();
     }
+    // 这里的@Alias注解指定的别名与type类型绑定
     registerAlias(alias, type);
   }
 
   public void registerAlias(String alias, Class<?> value) {
-    if (alias == null) {
+    if (alias == null) { // 传入的别名为null，直接抛出异常
       throw new TypeException("The parameter alias cannot be null");
     }
+    // 将别名全部转换为小写 -- yyl 这是为了后续判断 key 相等
     // issue #748
     String key = alias.toLowerCase(Locale.ENGLISH);
+    // 检测别名是否存在冲突，如果存在冲突，则直接抛出异常
     if (typeAliases.containsKey(key) && typeAliases.get(key) != null && !typeAliases.get(key).equals(value)) {
       throw new TypeException("The alias '" + alias + "' is already mapped to the value '" + typeAliases.get(key).getName() + "'.");
     }
+    // 在typeAliases集合中记录别名与类之间的映射关系
     typeAliases.put(key, value);
   }
 

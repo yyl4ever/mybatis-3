@@ -31,12 +31,23 @@ import org.apache.ibatis.cache.CacheException;
  * This way, other threads will wait until this element is filled instead of hitting the database.
  *
  * @author Eduardo Macarron
- *
+ * 装饰器,在原有 Cache 实现之上添加了阻塞线程的特性
+ * 对于一个 Key 来说，同一时刻，BlockingCache 只会让一个业务线程到数据库中去查找，查找到结果之后，会添加到 BlockingCache 中缓存。
  */
 public class BlockingCache implements Cache {
 
+  /**
+   * timeout 指定了一个线程在 BlockingCache 上阻塞的最长时间
+   */
   private long timeout;
+  /**
+   * 装饰器的体现
+   */
   private final Cache delegate;
+  /**
+   *  locks 为每个 Key 分配了一个 ReentrantLock 用来控制并发访问,
+   *  后续版本用的 ConcurrentHashMap<Object, CountDownLatch>
+   */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 
   public BlockingCache(Cache delegate) {
@@ -63,6 +74,13 @@ public class BlockingCache implements Cache {
     }
   }
 
+  /**
+   * 先调用 acquireLock() 方法获取锁，才能查询 delegate 缓存，
+   * 命中缓存之后会立刻调用 releaseLock() 方法释放锁，如果未命中缓存则不会释放锁。
+   * @param key
+   *          The key
+   * @return
+   */
   @Override
   public Object getObject(Object key) {
     acquireLock(key);
@@ -91,17 +109,17 @@ public class BlockingCache implements Cache {
 
   private void acquireLock(Object key) {
     Lock lock = getLockForKey(key);
-    if (timeout > 0) {
+    if (timeout > 0) {// 根据timeout的值，决定阻塞超时时间
       try {
         boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
-        if (!acquired) {
+        if (!acquired) { // 超时未获取到锁，则抛出异常
           throw new CacheException("Couldn't get a lock in " + timeout + " for the key " +  key + " at the cache " + delegate.getId());
         }
       } catch (InterruptedException e) {
         throw new CacheException("Got interrupted while trying to acquire lock for key " + key, e);
       }
     } else {
-      lock.lock();
+      lock.lock();// 死等
     }
   }
 

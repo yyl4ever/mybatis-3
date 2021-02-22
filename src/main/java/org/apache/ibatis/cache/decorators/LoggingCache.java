@@ -57,6 +57,7 @@ public class LoggingCache implements Cache {
       hits++;
     }
     if (log.isDebugEnabled()) {
+      // 记录某个 key 的缓存命中率
       log.debug("Cache Hit Ratio [" + getId() + "]: " + getHitRatio());
     }
     return value;

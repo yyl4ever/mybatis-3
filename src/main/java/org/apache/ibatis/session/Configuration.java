@@ -811,7 +811,7 @@ public class Configuration {
   }
 
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
-    return mapperRegistry.getMapper(type, sqlSession);
+    return mapperRegistry.getMapper(type, sqlSession);//mapperRegistry:维护了 Mapper 接口与代理工厂对象之间的映射关系
   }
 
   public boolean hasMapper(Class<?> type) {

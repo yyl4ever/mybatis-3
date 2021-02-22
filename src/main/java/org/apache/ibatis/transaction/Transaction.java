@@ -23,6 +23,7 @@ import java.sql.SQLException;
  * Handles the connection lifecycle that comprises: its creation, preparation, commit/rollback and close.
  *
  * @author Clinton Begin
+ *  MyBatis 中对数据库事务的抽象，其中定义了提交事务、回滚事务，以及获取事务底层数据库连接的方法。
  */
 public interface Transaction {
 
@@ -34,6 +35,12 @@ public interface Transaction {
    */
   Connection getConnection() throws SQLException;
 
+  /**
+   * 在日常使用数据库事务的时候，我们最常用的操作就是提交和回滚事务，
+   * Transaction 接口将这两个操作抽象为 commit() 方法和 rollback() 方法。
+   * 在 commit() 方法和 rollback() 方法中，JdbcTransaction
+   * 都是通过 java.sql.Connection 的同名方法实现事务的提交和回滚的。
+   */
   /**
    * Commit inner database connection.
    * @throws SQLException

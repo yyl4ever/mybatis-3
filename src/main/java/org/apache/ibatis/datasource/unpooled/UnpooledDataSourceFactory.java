@@ -26,6 +26,7 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 
 /**
  * @author Clinton Begin
+ * 工厂模式创建具体对象
  */
 public class UnpooledDataSourceFactory implements DataSourceFactory {
 
@@ -35,11 +36,13 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
   protected DataSource dataSource;
 
   public UnpooledDataSourceFactory() {
+    // 直接创建 UnpooledDataSource 对象
     this.dataSource = new UnpooledDataSource();
   }
 
   @Override
   public void setProperties(Properties properties) {
+    // 根据传入的配置信息，完成对该 UnpooledDataSource 对象相关属性的设置
     Properties driverProperties = new Properties();
     MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
     for (Object key : properties.keySet()) {
@@ -62,6 +65,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
 
   @Override
   public DataSource getDataSource() {
+    // 直接返回了上面创建的 UnpooledDataSource 对象
     return dataSource;
   }
 

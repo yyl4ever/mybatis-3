@@ -24,11 +24,28 @@ import org.apache.ibatis.cache.Cache;
  * FIFO (first in, first out) cache decorator.
  *
  * @author Clinton Begin
+ *  FIFO（先入先出）策略的装饰器,在系统运行过程中，我们会不断向 Cache 中增加缓存条目，
+ *  当 Cache 中的缓存条目达到上限的时候，则会将 Cache 中最早写入的缓存条目清理掉，这也就是先入先出的基本原理。
  */
 public class FifoCache implements Cache {
 
+  /**
+   * 装饰器模式的体现
+   */
   private final Cache delegate;
+
+  /**
+   *  a double-ended queue
+   *  keyList 队列（LinkedList），
+   *  主要利用 LinkedList 集合有序性，记录缓存条目写入 Cache 的先后顺序,
+   *  记录缓存项中的Key
+   */
   private final Deque<Object> keyList;
+
+  /**
+   * 当前 Cache 的大小上限（size 字段），当 Cache 大小超过该值时，
+   * 就会从 keyList 集合中查找最早的缓存条目并进行清理
+   */
   private int size;
 
   public FifoCache(Cache delegate) {
@@ -53,17 +70,20 @@ public class FifoCache implements Cache {
 
   @Override
   public void putObject(Object key, Object value) {
+    // 执行 FIFO 策略清理缓
     cycleKeyList(key);
     delegate.putObject(key, value);
   }
 
   @Override
   public Object getObject(Object key) {
+    // 直接委托给底层 delegate 这个被装饰的 Cache 对象的同名方法
     return delegate.getObject(key);
   }
 
   @Override
   public Object removeObject(Object key) {
+    // 直接委托给底层 delegate 这个被装饰的 Cache 对象的同名方法
     return delegate.removeObject(key);
   }
 
@@ -74,8 +94,10 @@ public class FifoCache implements Cache {
   }
 
   private void cycleKeyList(Object key) {
-    keyList.addLast(key);
+    keyList.addLast(key);// 记录缓存项中的Key
+    // 当keyList长度超过上限，表示Cache缓存达到上限，开始进行清理
     if (keyList.size() > size) {
+      // 找到keyList中最早写入的key，并从底层Cache中删除该缓存条目
       Object oldestKey = keyList.removeFirst();
       delegate.removeObject(oldestKey);
     }

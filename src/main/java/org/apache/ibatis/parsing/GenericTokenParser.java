@@ -74,7 +74,7 @@ public class GenericTokenParser {
           builder.append(src, start, src.length - start);
           offset = src.length;
         } else {
-          builder.append(handler.handleToken(expression.toString()));
+          builder.append(handler.handleToken(expression.toString()));// 将sql 中的字段用「？」来代替
           offset = end + closeToken.length();
         }
       }

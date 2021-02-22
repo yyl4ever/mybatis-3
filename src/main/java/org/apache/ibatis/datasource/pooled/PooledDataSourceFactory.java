@@ -23,6 +23,7 @@ import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 public class PooledDataSourceFactory extends UnpooledDataSourceFactory {
 
   public PooledDataSourceFactory() {
+    // 将 dataSource 字段指向的 DataSource 对象类型改为 PooledDataSource 类型
     this.dataSource = new PooledDataSource();
   }
 

@@ -26,6 +26,10 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
  * Creates {@link Transaction} instances.
  *
  * @author Clinton Begin
+ * TransactionFactory 是用于创建 Transaction 的工厂接口，
+ * 其中最核心的方法是 newTransaction() 方法，它会根据数据库连接或数据源创建 Transaction 对象。
+ *
+ * JdbcTransaction、ManagedTransaction 是 MyBatis 自带的两个 Transaction 接口实现，这里也使用到了工厂方法模式
  */
 public interface TransactionFactory {
 

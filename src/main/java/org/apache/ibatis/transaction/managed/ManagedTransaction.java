@@ -34,6 +34,8 @@ import org.apache.ibatis.transaction.Transaction;
  * @author Clinton Begin
  *
  * @see ManagedTransactionFactory
+ * ManagedTransaction 的实现相较于 JdbcTransaction 来说，有些许类似，也是依赖关联的 DataSource 获取数据库连接，
+ * 但其 commit()、rollback() 方法都是空实现，事务的提交和回滚都是依靠容器管理的，这也是它被称为 ManagedTransaction 的原因。
  */
 public class ManagedTransaction implements Transaction {
 
@@ -63,6 +65,10 @@ public class ManagedTransaction implements Transaction {
     return this.connection;
   }
 
+  /**
+   * yyl 这个空方法具体是怎么用的？
+   * @throws SQLException
+   */
   @Override
   public void commit() throws SQLException {
     // Does nothing
@@ -73,6 +79,11 @@ public class ManagedTransaction implements Transaction {
     // Does nothing
   }
 
+  /**
+   * 另外，与 JdbcTransaction 不同的是，ManagedTransaction 会
+   * 根据初始化时传入的 closeConnection 值确定是否在事务关闭时，同时关闭关联的数据库连接（即调用其 close() 方法）。
+   * @throws SQLException
+   */
   @Override
   public void close() throws SQLException {
     if (this.closeConnection && this.connection != null) {

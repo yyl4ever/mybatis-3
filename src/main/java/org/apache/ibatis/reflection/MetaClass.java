@@ -31,6 +31,9 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  * MetaClass 提供了获取类中属性描述信息的功能，底层依赖前面介绍的 Reflector
  *
  * MetaClass 中的其他方法实现也都大多是依赖 PropertyTokenizer 解析表达式，然后递归查找，查找过程会依赖 Reflector 的相关方法。
+ *
+ * MetaClass 中封装的是 Class 元信息，ObjectWrapper 封装的则是对象元信息。在 ObjectWrapper 中抽象了一个对象的属性信息，
+ * 并提供了查询对象属性信息的相关方法，以及更新属性值的相关方法。
  */
 public class MetaClass {
 

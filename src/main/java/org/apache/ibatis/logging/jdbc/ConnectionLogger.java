@@ -34,6 +34,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  */
 public final class ConnectionLogger extends BaseJdbcLogger implements InvocationHandler {
 
+  // 底层维护了一个 Connection 对象的引用
   private final Connection connection;
 
   private ConnectionLogger(Connection conn, Log statementLog, int queryStack) {
@@ -45,21 +46,29 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
   public Object invoke(Object proxy, Method method, Object[] params)
       throws Throwable {
     try {
+      //  // 如果调用的是从Object继承的方法，则直接调用，不做任何拦截
       if (Object.class.equals(method.getDeclaringClass())) {
         return method.invoke(this, params);
       }
+      // 为 prepareStatement()、prepareCall()、createStatement() 三个方法添加代理逻辑
+      // 调用prepareStatement()方法、prepareCall()方法的时候，
+      // 会在创建PreparedStatement对象之后，用PreparedStatementLogger为其创建代理对象
       if ("prepareStatement".equals(method.getName()) || "prepareCall".equals(method.getName())) {
         if (isDebugEnabled()) {
+          // 通过statementLog这个Log输出日志
           debug(" Preparing: " + removeBreakingWhitespace((String) params[0]), true);
         }
         PreparedStatement stmt = (PreparedStatement) method.invoke(connection, params);
         stmt = PreparedStatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
       } else if ("createStatement".equals(method.getName())) {
+        // 调用createStatement()方法的时候，
+        // 会在创建Statement对象之后，用StatementLogger为其创建代理对象
         Statement stmt = (Statement) method.invoke(connection, params);
         stmt = StatementLogger.newInstance(stmt, statementLog, queryStack);
         return stmt;
       } else {
+        // 除了上述三个方法之外，其他方法的调用将直接传递给底层Connection对象的相应方法处理
         return method.invoke(connection, params);
       }
     } catch (Throwable t) {
@@ -79,6 +88,7 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
    * @return the connection with logging
    */
   public static Connection newInstance(Connection conn, Log statementLog, int queryStack) {
+    // 使用 JDK 动态代理的方式为这个 Connection 对象创建相应的代理对象。
     InvocationHandler handler = new ConnectionLogger(conn, statementLog, queryStack);
     ClassLoader cl = Connection.class.getClassLoader();
     return (Connection) Proxy.newProxyInstance(cl, new Class[]{Connection.class}, handler);

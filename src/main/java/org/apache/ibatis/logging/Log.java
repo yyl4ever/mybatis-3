@@ -17,6 +17,7 @@ package org.apache.ibatis.logging;
 
 /**
  * @author Clinton Begin
+ * Log 接口的实现类中，就包含了多种第三方日志框架的适配器
  */
 public interface Log {
 

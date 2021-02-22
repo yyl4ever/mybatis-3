@@ -25,14 +25,18 @@ import org.apache.ibatis.logging.Log;
  */
 public class Jdk14LoggingImpl implements Log {
 
+  // 这是 JDK 提供的日志框架
+  // 将日志输出操作委托给底层封装的java.util.logging.Logger 对象的相应方法
   private final Logger log;
 
   public Jdk14LoggingImpl(String clazz) {
+    // 初始化log字段
     log = Logger.getLogger(clazz);
   }
 
   @Override
   public boolean isDebugEnabled() {
+    // 全部调用依赖java.util.logging.Logger对象进行实现
     return log.isLoggable(Level.FINE);
   }
 

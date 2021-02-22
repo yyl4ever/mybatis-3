@@ -21,6 +21,7 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * yyl 距离上次清除缓存的时间间隔大于指定值，就清除缓存
  */
 public class ScheduledCache implements Cache {
 

@@ -22,18 +22,22 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ * LongTypeHandler 的核心还是通过 PreparedStatement.setLong() 方法以及 ResultSet.getLong() 方法实现的。
+ * 至于其他 BaseTypeHandler 的核心实现，同样也是依赖了 JDBC 的 API
  */
 public class LongTypeHandler extends BaseTypeHandler<Long> {
 
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, Long parameter, JdbcType jdbcType)
       throws SQLException {
+    // 调用PreparedStatement.setLong()实现参数绑定
     ps.setLong(i, parameter);
   }
 
   @Override
   public Long getNullableResult(ResultSet rs, String columnName)
       throws SQLException {
+    // 调用ResultSet.getLong()获取指定列值
     long result = rs.getLong(columnName);
     return result == 0 && rs.wasNull() ? null : result;
   }
@@ -41,6 +45,7 @@ public class LongTypeHandler extends BaseTypeHandler<Long> {
   @Override
   public Long getNullableResult(ResultSet rs, int columnIndex)
       throws SQLException {
+    // 调用ResultSet.getLong()获取指定列值
     long result = rs.getLong(columnIndex);
     return result == 0 && rs.wasNull() ? null : result;
   }
@@ -48,6 +53,7 @@ public class LongTypeHandler extends BaseTypeHandler<Long> {
   @Override
   public Long getNullableResult(CallableStatement cs, int columnIndex)
       throws SQLException {
+    // 调用ResultSet.getLong()获取指定列值
     long result = cs.getLong(columnIndex);
     return result == 0 && cs.wasNull() ? null : result;
   }

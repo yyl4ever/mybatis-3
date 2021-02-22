@@ -30,6 +30,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * InvocationHandler 接口的实现
  *
  */
 public final class PreparedStatementLogger extends BaseJdbcLogger implements InvocationHandler {
@@ -41,6 +42,15 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
     this.statement = stmt;
   }
 
+  /**
+   *  invoke() 方法中调用了 SET_METHODS 集合中的方法、EXECUTE_METHODS 集合中的方法
+   *  或 getResultSet() 方法时，会添加相应的代理逻辑。
+   * @param proxy
+   * @param method
+   * @param params
+   * @return
+   * @throws Throwable
+   */
   @Override
   public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
     try {

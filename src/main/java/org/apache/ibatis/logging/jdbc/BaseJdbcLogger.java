@@ -34,13 +34,19 @@ import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
  * Base class for proxies to do logging.
+ * 将数据库操作涉及的信息通过指定的 Log 打印到日志文件中。
+ * 将执行的 SQL 语句、SQL 绑定的参数、SQL 执行之后影响的`行数等信息，
+ * 统统打印到日志中，这个功能主要是在测试环境进行调试的时候使用，很少在线上开启，
+ * 因为这会产生非常多的日志，拖慢系统性能。
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public abstract class BaseJdbcLogger {
 
+  // 记录绑定 SQL 参数涉及的全部 set*() 方法名称，例如 setString() 方法、setInt() 方法等
   protected static final Set<String> SET_METHODS;
+  // 记录执行 SQL 语句涉及的所有方法名称，例如 execute() 方法、executeUpdate() 方法、executeQuery() 方法、addBatch() 方法等。
   protected static final Set<String> EXECUTE_METHODS = new HashSet<>();
 
   private final Map<Object, Object> columnMap = new HashMap<>();

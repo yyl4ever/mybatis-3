@@ -64,7 +64,7 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
-      parameterMappings.add(buildParameterMapping(content));
+      parameterMappings.add(buildParameterMapping(content));//yyl 参数的java类型和jdbc的映射关系，会被放入到 parameterMappings
       return "?";
     }
 

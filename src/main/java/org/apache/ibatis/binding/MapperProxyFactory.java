@@ -25,6 +25,8 @@ import org.apache.ibatis.session.SqlSession;
 
 /**
  * @author Lasse Voss
+ * 创建 Mapper 接口的代理对象，
+ * 其底层核心原理就是 JDK 动态代理。
  */
 public class MapperProxyFactory<T> {
 
@@ -45,6 +47,10 @@ public class MapperProxyFactory<T> {
 
   @SuppressWarnings("unchecked")
   protected T newInstance(MapperProxy<T> mapperProxy) {
+    // 创建实现了mapperInterface接口的动态代理对象，
+    // 这里使用的InvocationHandler 实现是MapperProxy --yyl mapperProxy 是怎么实现 mapperInterface 接口的？
+    // yyl MapperProxy 只是实现了 InvocationHandler 接口，并没有实现 mapperInterface 接口
+    // yyl todo 有空找个普通的动态代理实现看一下
     return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[] { mapperInterface }, mapperProxy);
   }
 

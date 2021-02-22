@@ -6,7 +6,6 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.submitted.resolution.cachereffromxml.UserMapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -42,6 +41,18 @@ public class MybatisTest {
   }
 
   @Test
+  public void testGetObject() throws Exception {
+    SqlSessionFactory sf = new SqlSessionFactoryBuilder()
+      .build(Resources.getResourceAsStream(resource));
+    //获取session对象
+    SqlSession session = sf.openSession();
+    TtlProductInfoMapper mapper = session.getMapper(TtlProductInfoMapper.class);//org.apache.ibatis.binding.MapperProxy@50ad3bc1
+    TtlProductInfoPo ttlProductInfoPo = mapper.get(1L);
+    System.out.println(ttlProductInfoPo);
+    session.close();
+  }
+
+  @Test
   public void testAdd() throws IOException {
     //创建sessionFactory对象
     SqlSessionFactory sf = new SqlSessionFactoryBuilder()
@@ -58,18 +69,6 @@ public class MybatisTest {
     //提交事务,这个是必须要的,否则即使sql发了也保存不到数据库中
     session.commit();
     //关闭资源
-    session.close();
-  }
-
-  @Test
-  public void testGetObject() throws Exception {
-    SqlSessionFactory sf = new SqlSessionFactoryBuilder()
-      .build(Resources.getResourceAsStream(resource));
-    //获取session对象
-    SqlSession session = sf.openSession();
-    TtlProductInfoMapper mapper = session.getMapper(TtlProductInfoMapper.class);
-    TtlProductInfoPo ttlProductInfoPo = mapper.get(1L);
-    System.out.println(ttlProductInfoPo);
     session.close();
   }
 }

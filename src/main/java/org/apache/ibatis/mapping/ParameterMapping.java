@@ -102,7 +102,7 @@ public class ParameterMapping {
     public ParameterMapping build() {
       resolveTypeHandler();
       validate();
-      return parameterMapping;
+      return parameterMapping;//yyl 参数映射的相关信息
     }
 
     private void validate() {

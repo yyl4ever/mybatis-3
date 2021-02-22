@@ -17,13 +17,13 @@ package org.apache.ibatis.reflection;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
+/**
+ * DefaultReflectorFactory 是 ReflectorFactory 接口的默认实现，
+ * 它默认会在内存中维护一个 ConcurrentHashMap<Class<?>,Reflector> 集合（reflectorMap 字段）缓存其创建的所有 Reflector 对象。
+ */
 public class DefaultReflectorFactory implements ReflectorFactory {
   private boolean classCacheEnabled = true;
-  /**
-   * DefaultReflectorFactory 是 ReflectorFactory 接口的默认实现，
-   * 它默认会在内存中维护一个 ConcurrentHashMap<Class<?>,Reflector> 集合（reflectorMap 字段）缓存其创建的所有 Reflector 对象。
-   */
+
   private final ConcurrentMap<Class<?>, Reflector> reflectorMap = new ConcurrentHashMap<>();
 
   public DefaultReflectorFactory() {
