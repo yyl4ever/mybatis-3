@@ -34,6 +34,7 @@ class JdbcTypeTest {
   @Test
   void shouldHaveRequiredStandardConstants() throws Exception {
     for (String typeName : requiredStandardTypeNames) {
+      //Types.class.getField(typeName) -- 用反射的方式获取属性
       int typeCode = Types.class.getField(typeName).getInt(null);
       JdbcType jdbcType = JdbcType.valueOf(typeName);
       assertEquals(typeCode, jdbcType.TYPE_CODE);
@@ -45,4 +46,16 @@ class JdbcTypeTest {
     JdbcType jdbcType = JdbcType.valueOf("DATETIMEOFFSET");
     assertEquals(-155, jdbcType.TYPE_CODE);
   }
+
+  @Test
+  public void testGetFieldValue() throws NoSuchFieldException, IllegalAccessException {
+    String typeName = "BIGINT";
+    // 获取指定字段的属性值
+    int value = Types.class.getField(typeName).getInt(null);
+    System.out.println(value);
+    // 获取指定字段的属性值
+    Object value1 = Types.class.getField(typeName).get(null);
+    System.out.println(value1);
+  }
+
 }

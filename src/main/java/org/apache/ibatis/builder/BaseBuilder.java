@@ -30,10 +30,23 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * BaseBuilder 抽象类扮演了构造者模式中 Builder 接口的角色
  */
 public abstract class BaseBuilder {
+  /**
+   * MyBatis 的初始化过程就是围绕 Configuration 对象展开的，
+   * 我们可以认为 Configuration 是一个单例对象，
+   * MyBatis 初始化解析到的全部配置信息都会记录到 Configuration 对象中。
+   */
   protected final Configuration configuration;
+  /**
+   * 别名注册中心,<typeAliases>
+   */
   protected final TypeAliasRegistry typeAliasRegistry;
+  /**
+   * TypeHandler 注册中心。 <typeHandlers> 标签添加自定义 TypeHandler 实现，实现数据库类型与 Java 类型的自定义转换，
+   * 这些自定义的 TypeHandler 都会记录在这个 TypeHandlerRegistry 对象中。
+   */
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   public BaseBuilder(Configuration configuration) {
@@ -132,6 +145,12 @@ public abstract class BaseBuilder {
     return resolveTypeHandler(javaType, typeHandlerType);
   }
 
+  /**
+   * 解析 TypeHandler
+   * @param javaType
+   * @param typeHandlerType
+   * @return
+   */
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
     if (typeHandlerType == null) {
       return null;
@@ -145,6 +164,12 @@ public abstract class BaseBuilder {
     return handler;
   }
 
+  /**
+   * 解析别名
+   * @param alias
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }

@@ -74,7 +74,10 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
+      // XMLConfigBuilder 会解析 mybatis-config.xml 配置文件得到对应的 Configuration 全局配置对象
+      // -- 疑问：在哪里指定 mybatis-config.xml 的？inputStream
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+      // XMLConfigBuilder.parse() 方法触发了 mybatis-config.xml 配置文件的解析
       return build(parser.parse());
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
